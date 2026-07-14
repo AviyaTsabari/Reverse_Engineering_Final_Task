@@ -58,10 +58,9 @@ InternetOpenA, InternetConnectA, HttpOpenRequestA, HttpSendRequestA, InternetClo
 
 אבל כעת אני רואה שהכל נכתב בסקשן 20000, אז בשביל הקוד החדש אני רוצה סקשן נוסף לכתוב בו, אז ניכנס שוב לCFF ונוסיף והכתובת הוירטואלית של הסקשן של הקוד היא 22000.
 
+נכניס בתכנית מחרוזת עם כתובת המייצגת את השרת:
 
-
-
-
+<img width="427" height="182" alt="image" src="https://github.com/user-attachments/assets/df53ae1f-2e80-4c50-927a-160a7fb12391" />
 
 
 
