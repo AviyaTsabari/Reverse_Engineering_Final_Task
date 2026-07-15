@@ -88,7 +88,7 @@ InternetOpenA, InternetConnectA, HttpOpenRequestA, HttpSendRequestA, InternetClo
     
     call    ds:InternetOpenA
     
-                                                                                                                                            ; שמירת ה-handle של ה-session
+                                                                                                                                                                                                                                                                                                            ; שמירת ה-handle של ה-session
     
     mov     ebx, eax
     
@@ -119,14 +119,14 @@ InternetOpenA, InternetConnectA, HttpOpenRequestA, HttpSendRequestA, InternetClo
     
     call    ds:InternetConnectA
     
-                                                                                                                                                ; שמירת ה-handle של החיבור
+                                                                                                                                                                                                                                                                                                                ; שמירת ה-handle של החיבור
     
     mov     esi, eax
     
     
     ; ============================================================
     
-                                                                                                                                                ; יצירת בקשת HTTP מסוג POST
+                                                                                                                                                                                                                                                                                                            ; יצירת בקשת HTTP מסוג POST
     
     ; HttpOpenRequestA(...)
     
@@ -150,13 +150,13 @@ InternetOpenA, InternetConnectA, HttpOpenRequestA, HttpSendRequestA, InternetClo
     
     call    ds:HttpOpenRequestA
     
-                                                                                                                                                ; שמירת ה-handle של הבקשה
+                                                                                                                                                                                                                                                                                                                ; שמירת ה-handle של הבקשה
     
     mov     edi, eax
     
     
     ; ============================================================
-                                                                                                                                                        ; שליחת הבקשה לשרת
+                                                                                                                                                                                                                                                                                                                    ; שליחת הבקשה לשרת
     
     ; HttpSendRequestA(...)
     
@@ -176,23 +176,23 @@ InternetOpenA, InternetConnectA, HttpOpenRequestA, HttpSendRequestA, InternetClo
     
     ; ============================================================
     
-                                                                                                                                                        ; שחרור כל ה-handles
+                                                                                                                                                                                                                                                                                                                        ; שחרור כל ה-handles
     
     ; ============================================================
     
-                                                                                                                                                        ; סגירת ה-request
+                                                                                                                                                                                                                                                                                                                        ; סגירת ה-request
     
     push    edi
     
     call    ds:InternetCloseHandle
     
-                                                                                                                                                            ; סגירת החיבור
+                                                                                                                                                                                                                                                                                                                            ; סגירת החיבור
     
     push    esi
     
     call    ds:InternetCloseHandle
     
-                                                                                                                                                        ; סגירת ה-session
+                                                                                                                                                                                                                                                                                                                        ; סגירת ה-session
     
     push    ebx
     
