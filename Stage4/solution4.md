@@ -58,11 +58,191 @@ InternetOpenA, InternetConnectA, HttpOpenRequestA, HttpSendRequestA, InternetClo
 
 אבל כעת אני רואה שהכל נכתב בסקשן 20000, אז בשביל הקוד החדש אני רוצה סקשן נוסף לכתוב בו, אז ניכנס שוב לCFF ונוסיף והכתובת הוירטואלית של הסקשן של הקוד היא 22000.
 
-נכניס בתכנית מחרוזת עם כתובת המייצגת את השרת:
+נכניס בתכנית מחרוזות בהתאם למה שאנחנו רוצים (סוג הבקשה ומחרוזות של הודעה):
 
-<img width="427" height="182" alt="image" src="https://github.com/user-attachments/assets/df53ae1f-2e80-4c50-927a-160a7fb12391" />
+<img width="842" height="240" alt="image" src="https://github.com/user-attachments/assets/ae3622db-2eee-4f97-8e51-5b61b750c89b" />
+
+בכניסה לתוכנית, כפי שעשינו בחלק ג נדרוס את שתי ההוראות הראשונה על ידי פקודת JMP לסקשן הקוד 1022000 (+ שתי פקודות Nop לאיזון הבתים) ובקוד שלנו נסיים עם שתי הפקודות האלו ונקפוץ בחזרה לפקודה השלישית המקורית.
+
+נכתוב את הקוד הבא ונסביר:
+    
+    pusha
+    
+    ; ============================================================
+    
+                                                                                                                                                ; יצירת Internet Session
+    
+    ; InternetOpenA("Test", INTERNET_OPEN_TYPE_DIRECT, NULL, NULL, 0)
+    
+    ; ============================================================
+    
+    push    0
+    
+    push    0
+    
+    push    0
+    
+    push    1
+    
+    push    offset aTest
+    
+    call    ds:InternetOpenA
+    
+                                                                                                                                            ; שמירת ה-handle של ה-session
+    
+    mov     ebx, eax
+    
+    
+    ; ============================================================
+                                                                                          
+                                                                                                                                                    ; התחברות לשרת המקומי
+    ; InternetConnectA(hInternet, "127.0.0.1", 80, NULL, NULL,
+    ;                  INTERNET_SERVICE_HTTP, 0, 0)
+    
+    ; ============================================================
+    
+    push    0
+    
+    push    0
+    
+    push    3
+    
+    push    0
+    
+    push    0
+    
+    push    50h                 ; פורט 80
+    
+    push    offset a127001      ; "127.0.0.1"
+    
+    push    ebx
+    
+    call    ds:InternetConnectA
+    
+                                                                                                                                                ; שמירת ה-handle של החיבור
+    
+    mov     esi, eax
+    
+    
+    ; ============================================================
+    
+                                                                                                                                                ; יצירת בקשת HTTP מסוג POST
+    
+    ; HttpOpenRequestA(...)
+    
+    ; ============================================================
+    
+    push    0
+    
+    push    0
+    
+    push    0
+    
+    push    0
+    
+    push    0
+    
+    push    offset aMessage     ; "/message"
+    
+    push    offset aPost        ; "POST"
+    
+    push    esi
+    
+    call    ds:HttpOpenRequestA
+    
+                                                                                                                                                ; שמירת ה-handle של הבקשה
+    
+    mov     edi, eax
+    
+    
+    ; ============================================================
+                                                                                                                                                        ; שליחת הבקשה לשרת
+    
+    ; HttpSendRequestA(...)
+    
+    ; ============================================================
+    
+    push    10h
+    
+    push    offset aHelloFromPatch     ; "Hello from patch"
+    
+    push    0
+    
+    push    0
+    
+    push    edi 
+    
+    call    ds:HttpSendRequestA
+    
+    ; ============================================================
+    
+                                                                                                                                                        ; שחרור כל ה-handles
+    
+    ; ============================================================
+    
+                                                                                                                                                        ; סגירת ה-request
+    
+    push    edi
+    
+    call    ds:InternetCloseHandle
+    
+                                                                                                                                                            ; סגירת החיבור
+    
+    push    esi
+    
+    call    ds:InternetCloseHandle
+    
+                                                                                                                                                        ; סגירת ה-session
+    
+    push    ebx
+    
+    call    ds:InternetCloseHandle
+    
+    ; ============================================================
+    
+                                                                                                                                     ; שחזור האוגרים וחזרה לתוכנית המקורית
+    
+    ; ============================================================
+    
+    popa
+    
+    push    70h
+    
+    push    offset stru_1001390
+    
+    jmp     loc_1003E28
+
+הסבר
+
+שמירת האוגרים:
+
+בתחילת הקוד ביצענו pusha, כדי לשמור את כל האוגרים של המשחק ולא לפגוע בפעולתו.
+                                                                                                                                                                    פתיחת Session לאינטרנט:
+
+קראנו ל־InternetOpenA, שיצרה Session של WinINet והחזירה handle, אותו שמרנו ב־EBX.
+
+התחברות לשרת המקומי:
+                                                                                                                                                                    קראנו ל־InternetConnectA עם הכתובת 127.0.0.1 ופורט 80.
+                                                                                                                                                                    הפונקציה יצרה חיבור לשרת המקומי והחזירה handle, אותו שמרנו ב־ESI.
+
+יצירת בקשת HTTP :
+                                                                                                                                                                    קראנו ל־HttpOpenRequestA כדי ליצור בקשת HTTP מסוג POST לנתיב /message.
+                                                                                                                                                                    הפונקציה החזירה handle לבקשה, אותו שמרנו ב־EDI.
+                                                                                                                                                                    שליחת ההודעה:
+                                                                                                                                                                    קראנו ל־HttpSendRequestA, ששלחה לשרת את המחרוזת "Hello from patch".
+
+שחרור משאבים:
+
+סגרנו את שלושת ה־handles (EDI, ESI, EBX) באמצעות InternetCloseHandle, כדי למנוע דליפת משאבים.
+                                                                                                                                                                    חזרה לתוכנית המקורית:
+                                                                                                                                                                    ביצענו popa כדי לשחזר את כל האוגרים למצבם המקורי.
+                                                                                                                                                                    קפצנו בחזרה לנקודת ההמשך של המשחק (jmp loc_1003E28), כך שהתוכנית ממשיכה לרוץ כאילו לא בוצעה שום התערבות.
 
 
+כעת נותר להפעיל את המשחק ולראות מה קורה בשרת:
 
+<img width="683" height="121" alt="צילום מסך 2026-07-14 222826" src="https://github.com/user-attachments/assets/4010186e-c40b-44dc-9810-f78d69739fcd" />
 
+רואים שנשלחה ההודעה בהצלחה: Hello from patch.
 
+היה לא פשוט בכלל ודרש לחפש פונקציות חדשות שעובדות עם השרת וללמוד איך לייבא אוך=תן במאצעות CFF ולפתוח מקום חדש (סקשן) ריק על מנת שנוכל "להזריק את הקוד" אבל ברוך השם הצלחתי וזה מאוד מספק!
